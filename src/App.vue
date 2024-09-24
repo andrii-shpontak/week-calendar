@@ -1,30 +1,40 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div class="max-w-screen-sm mx-8 sm:mx-auto mt-8 border rounded-lg overflow-hidden">
+    <div class="bg-purple-500 px-6 py-4 text-white flex justify-center">
+      <div>
+        <router-link
+          :class="`py-1 px-3 rounded-md text-white font-bold select-none ${
+            route.name === RoutesEnum.MAIN ? 'bg-purple-600' : ''
+          }`"
+          :to="{ name: RoutesEnum.MAIN }"
+        >
+          Main
+        </router-link>
+        <router-link
+          :class="`py-1 px-3 rounded-md text-white font-bold select-none ml-4 ${
+            route.name === RoutesEnum.SCHEDULER ? 'bg-purple-600' : ''
+          }`"
+          :to="{ name: RoutesEnum.SCHEDULER }"
+        >
+          Scheduler
+        </router-link>
+      </div>
+    </div>
+    <div class="px-6 py-4 transition-all duration-300">
+      <router-view />
+    </div>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+<script lang="ts">
+import { defineComponent } from 'vue'
+import { useRoute } from 'vue-router'
+import { RoutesEnum } from './shared/enums'
+
+export default defineComponent({
+  setup() {
+    const route = useRoute()
+    return { RoutesEnum, route }
+  },
+})
+</script>
