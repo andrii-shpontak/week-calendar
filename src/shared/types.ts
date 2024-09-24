@@ -1,1 +1,6 @@
-export type TScheduler = {}
+export type TTimeInterval = {
+  bt: number
+  et: number
+}
+
+export type TScheduler = Record<string, TTimeInterval[]>

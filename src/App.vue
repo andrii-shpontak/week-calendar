@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-screen-sm mx-8 sm:mx-auto mt-8 border rounded-lg overflow-hidden">
+  <div class="max-w-screen-md mx-8 sm:mx-auto mt-8 border rounded-lg overflow-hidden">
     <div class="bg-purple-500 px-6 py-4 text-white flex justify-center">
       <div>
         <router-link
@@ -20,7 +20,7 @@
         </router-link>
       </div>
     </div>
-    <div class="px-6 py-4 transition-all duration-300">
+    <div class="px-6 py-4 transition-all duration-300 text-slate-700">
       <router-view />
     </div>
   </div>
