@@ -1,14 +1,25 @@
-import { computed, ref } from 'vue'
+import { cloneObject, isNotEqual } from '../helpers'
+import { ref, watch } from 'vue'
 
 import type { TTimeInterval } from '../types'
 import { defaultScheduler } from '../constants'
 
 export const useSchedule = () => {
-  const days = ref<Record<string, TTimeInterval[]>>(defaultScheduler)
+  const days = ref<Record<string, TTimeInterval[]>>(cloneObject(defaultScheduler))
   const isSelecting = ref(false)
   const selectionType = ref<'select' | 'deselect' | null>(null)
+  const isChanged = ref(false)
 
-  const hours = computed(() => Array.from({ length: 24 }, (_, i) => i))
+  const resetSchedule = () => {
+    days.value = cloneObject(cloneObject(defaultScheduler))
+    isChanged.value = false
+  }
+
+  const saveSchedule = () => {
+    console.log('Current schedule:', days.value)
+  }
+
+  const hours = Array.from({ length: 24 }, (_, i) => i)
 
   const isHourSelected = (dayKey: string, hour: number) => {
     const minutes = hour * 60
@@ -17,22 +28,29 @@ export const useSchedule = () => {
   }
 
   const toggleAllDay = (dayKey: string) => {
-    console.log('toggle')
     const isAllSelected =
       days.value[dayKey].length === 1 && days.value[dayKey][0].bt === 0 && days.value[dayKey][0].et === 1439
     days.value[dayKey] = isAllSelected ? [] : [{ bt: 0, et: 1439 }]
   }
 
-  const startSelection = (dayKey: string, hour: number) => {
-    isSelecting.value = true
-    selectionType.value = isHourSelected(dayKey, hour) ? 'deselect' : 'select'
-    updateSelection(dayKey, hour)
-  }
+  const mergeIntervals = (intervals: TTimeInterval[]) => {
+    if (!intervals.length) return []
+    intervals.sort((a, b) => a.bt - b.bt)
 
-  const dragSelection = (dayKey: string, hour: number) => {
-    if (isSelecting.value) {
-      updateSelection(dayKey, hour)
+    let merged: TTimeInterval[] = [intervals[0]]
+
+    for (let i = 1; i < intervals.length; i++) {
+      const current = intervals[i]
+      const last = merged[merged.length - 1]
+
+      if (current.bt <= last.et + 1) {
+        last.et = Math.max(last.et, current.et)
+      } else {
+        merged.push(current)
+      }
     }
+
+    return merged
   }
 
   const updateSelection = (dayKey: string, hour: number) => {
@@ -48,36 +66,47 @@ export const useSchedule = () => {
     }
   }
 
+  const startSelection = (dayKey: string, hour: number) => {
+    isSelecting.value = true
+    selectionType.value = isHourSelected(dayKey, hour) ? 'deselect' : 'select'
+    updateSelection(dayKey, hour)
+  }
+
+  const dragSelection = (dayKey: string, hour: number) => {
+    if (isSelecting.value) {
+      updateSelection(dayKey, hour)
+    }
+  }
+
   const endSelection = () => {
     isSelecting.value = false
     selectionType.value = null
   }
 
-  const mergeIntervals = (intervals: TTimeInterval[]) => {
-    intervals.sort((a, b) => a.bt - b.bt)
-    let merged: TTimeInterval[] = [intervals[0]]
-    for (let i = 1; i < intervals.length; i++) {
-      const current = intervals[i]
-      const last = merged[merged.length - 1]
-      if (current.bt <= last.et) {
-        last.et = Math.max(last.et, current.et)
-      } else {
-        merged.push(current)
-      }
-    }
-    return merged
+  const isAllDaySelected = (dayKey: string) => {
+    const intervals = days.value[dayKey]
+    return intervals.length === 1 && intervals[0].bt === 0 && intervals[0].et === 1439
   }
+
+  watch(
+    days,
+    (newValue) => {
+      isChanged.value = isNotEqual(newValue, defaultScheduler)
+    },
+    { deep: true }
+  )
 
   return {
     days,
-    isSelecting,
-    selectionType,
     hours,
     isHourSelected,
     toggleAllDay,
     startSelection,
     dragSelection,
-    updateSelection,
     endSelection,
+    resetSchedule,
+    saveSchedule,
+    isAllDaySelected,
+    isChanged,
   }
 }
