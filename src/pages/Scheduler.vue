@@ -18,7 +18,7 @@
 <script lang="ts">
 import WeekCalendar from '../components/WeekCalendar.vue'
 import ScheduleButtons from '../components/ScheduleButtons.vue'
-import { useSchedule } from '../shared/hooks'
+import { useSchedule } from '../utils/hooks'
 
 export default {
   components: {

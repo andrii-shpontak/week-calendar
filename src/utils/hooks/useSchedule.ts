@@ -1,8 +1,10 @@
 import { cloneObject, isNotEqual } from '../helpers'
 import { ref, watch } from 'vue'
 
-import type { TTimeInterval } from '../types'
-import { defaultScheduler } from '../constants'
+import { LocalStorageKeys } from '../../shared/enums'
+import { LocalStorageService } from '../services'
+import type { TTimeInterval } from '../../shared/types'
+import { defaultScheduler } from '../../shared/constants'
 
 export const useSchedule = () => {
   const days = ref<Record<string, TTimeInterval[]>>(cloneObject(defaultScheduler))
@@ -16,7 +18,8 @@ export const useSchedule = () => {
   }
 
   const saveSchedule = () => {
-    console.log('Current schedule:', days.value)
+    LocalStorageService.setItem(LocalStorageKeys.Scheduler, days.value)
+    window.location.reload()
   }
 
   const hours = Array.from({ length: 24 }, (_, i) => i)
